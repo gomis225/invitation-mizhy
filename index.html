@@ -80,6 +80,14 @@ footer{padding:64px 24px calc(48px + env(safe-area-inset-bottom));text-align:cen
 footer .serif{font-size:1.7rem;color:var(--vf);font-style:italic;margin-bottom:6px}
 footer p{color:var(--rf);font-weight:600}
 
+/* BARRE DE NAVIGATION */
+.rail{position:fixed;right:max(8px,env(safe-area-inset-right));top:50%;transform:translateY(-50%);height:44vh;max-height:340px;width:22px;z-index:20;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:6px 0}
+.rail .track{position:absolute;top:6px;bottom:6px;left:50%;width:4px;margin-left:-2px;border-radius:4px;background:rgba(255,255,255,.55);box-shadow:0 0 0 1px rgba(109,58,156,.25)}
+.rail .fill{width:100%;height:0;border-radius:4px;background:linear-gradient(var(--v),var(--rf))}
+.rail a{position:relative;width:22px;height:22px;display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
+.rail a::before{content:"";width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--v);box-shadow:0 1px 4px rgba(60,20,100,.3);transition:transform .6s,background .6s,border-color .6s}
+.rail a.on::before{background:var(--rf);border-color:#fff;transform:scale(1.35)}
+
 /* ANIMATIONS */
 .rv{opacity:0;transform:translateY(24px);transition:opacity 1.3s ease,transform 1.3s ease}
 .rv.in{opacity:1;transform:none}
@@ -109,6 +117,10 @@ footer p{color:var(--rf);font-weight:600}
 
 <div id="site">
   <div class="flt" id="flt" aria-hidden="true"></div>
+  <nav class="rail" id="rail" aria-label="Navigation dans la page">
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <a href="#accueil" aria-label="Accueil"></a><a href="#histoire" aria-label="Notre histoire"></a><a href="#programme" aria-label="Le programme"></a><a href="#lieu" aria-label="Le lieu"></a><a href="#presence" aria-label="Confirmer ma présence"></a>
+  </nav>
 
   <section class="hero" id="accueil">
     <div class="in">
@@ -123,7 +135,7 @@ footer p{color:var(--rf);font-weight:600}
     </div>
   </section>
 
-  <section class="histoire" style="padding:72px 24px">
+  <section class="histoire" id="histoire" style="padding:72px 24px">
     <div>
       <p class="eyebrow rv" data-t="histoireSur"></p>
       <h2 class="words" data-t="histoireTitre"></h2>
@@ -133,7 +145,7 @@ footer p{color:var(--rf);font-weight:600}
     </div>
   </section>
 
-  <section class="prog">
+  <section class="prog" id="programme">
     <div>
       <p class="eyebrow rv" data-t="progSur"></p>
       <h2 class="words" data-t="progTitre"></h2>
@@ -141,7 +153,7 @@ footer p{color:var(--rf);font-weight:600}
     </div>
   </section>
 
-  <section class="lieu">
+  <section class="lieu" id="lieu">
     <p class="eyebrow rv" data-t="lieuSur"></p>
     <h2 class="words" data-t="lieuTitre"></h2>
     <p class="nom rv" data-t="lieu"></p>
@@ -149,7 +161,7 @@ footer p{color:var(--rf);font-weight:600}
     <a class="btn rv" id="route" target="_blank" rel="noopener">Ouvrir l’itinéraire</a>
   </section>
 
-  <section class="rsvp" style="padding:72px 24px">
+  <section class="rsvp" id="presence" style="padding:72px 24px">
     <p class="eyebrow rv" data-t="rsvpSur"></p>
     <h2 class="words" data-t="rsvpTitre"></h2>
     <p class="limit rv">Merci de répondre avant le <b id="lim"></b></p>
@@ -233,6 +245,18 @@ if (!calm) {
     f.appendChild(e);
   }
 }
+
+// barre de navigation : progression + point actif
+const fill = $('#fill'), dots = [...document.querySelectorAll('#rail a')];
+const secs = dots.map(a => document.querySelector(a.getAttribute('href')));
+function rail() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  fill.style.height = (max > 0 ? Math.min(100, scrollY / max * 100) : 0) + '%';
+  let cur = 0;
+  secs.forEach((el, i) => { if (el.getBoundingClientRect().top < innerHeight * .5) cur = i; });
+  dots.forEach((d, i) => d.classList.toggle('on', i === cur));
+}
+addEventListener('scroll', rail, { passive: true }); addEventListener('resize', rail); rail();
 
 // ouverture de l'enveloppe
 $('#openBtn').addEventListener('click', () => {
